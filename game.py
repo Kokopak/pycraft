@@ -13,20 +13,19 @@ class Game:
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode(screen_mode, flags)
-        pygame.display.set_caption("PyCraft 2D")
         self.blo = Block()
         self.lis_blo = []
 
         self.font = pygame.font.Font(None, 17)
 
         self.blocks = [
-                "cobble",
-                "plank",
-                "stone"]
+                "cobblestone",
+                "wooden_plank",
+                "stone",
+                "grass"]
 
-        self.selec = "cobble" 
-        self.font = pygame.font.Font(None, 19)
-        self.text = self.font.render("Selection: %s" % self.selec, True, (0,0,0))
+        self.selec = "cobblestone" 
+        pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
 
         self.back = pygame.image.load("img/grille.png").convert()
         self.lis_blo = list(set(self.lis_blo))
@@ -37,12 +36,8 @@ class Game:
     def aff_li(self):
         print self.lis_blo
 
-    def update(self):
-        return
-
     def draw(self):
         self.screen.blit(self.back, (0,0))
-        self.screen.blit(self.text, (0,1))
         for el in self.lis_blo:
             self.screen.blit(pygame.image.load(el[1]), (el[0][0], el[0][1] ))
         pygame.display.flip()
@@ -65,8 +60,7 @@ class Game:
                     if el[0] == (x, y):
                         self.lis_blo.remove(el)
             if event.type == KEYDOWN and event.key == K_SPACE:
-                #self.lis_blo = []
-                self.update_list()
+                self.lis_blo = []
             if event.type == MOUSEBUTTONDOWN and event.button == 4:
                 if self.blocks.index(self.selec) == len(self.blocks) - 1:
                     self.selec = self.blocks[0]
@@ -77,12 +71,11 @@ class Game:
                     self.selec = self.blocks[0]
                 else:
                     self.selec = self.blocks[self.blocks.index(self.selec) - 1]
-            self.text = self.font.render("Selection: %s" % self.selec, True, (0,0,0))
+            pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
             self.screen.blit(self.back, (0,0))
-            self.update()
             self.draw()
 
 if __name__ == '__main__':
     game = Game()
     game.mainLoop()
-    game.aff_li()
+    #game.aff_li()
