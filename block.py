@@ -13,6 +13,6 @@ class Block:
         return (self.x, self.y)
     
     def get_image(self):
-        ig = pygame.image.load("img/%s.png" % self.nom)
+        ig = "img/%s.png" % (self.nom)
         return ig
 
