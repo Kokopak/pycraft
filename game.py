@@ -4,6 +4,7 @@ import pygame
 
 from pygame.locals import *
 from block import Block
+from inventory import Inventory
 
 screen_mode = (640, 480)
 flags = DOUBLEBUF
@@ -22,7 +23,9 @@ class Game:
                 "cobblestone",
                 "wooden_plank",
                 "stone",
-                "grass"]
+                "grass",
+                "glass",
+                "brick"]
 
         self.selec = "cobblestone" 
         pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
@@ -39,7 +42,7 @@ class Game:
     def draw(self):
         self.screen.blit(self.back, (0,0))
         for el in self.lis_blo:
-            self.screen.blit(pygame.image.load(el[1]), (el[0][0], el[0][1] ))
+            self.screen.blit(pygame.image.load(el[1]), (el[0][0], el[0][1]))
         pygame.display.flip()
 
     def mainLoop(self):
@@ -51,8 +54,12 @@ class Game:
                     self.ax = (pygame.mouse.get_pos()[0]/32) * 32
                     self.ay = (pygame.mouse.get_pos()[1]/32) * 32
                     self.blo = Block(self.ax,self.ay,self.selec)
-                    if ((self.ax, self.ay), self.blo.get_image(), self.selec) not in self.lis_blo:
+                    if ((self.ax, self.ay), self.blo.get_image(), self.selec) not in self.lis_blo :
                         self.lis_blo.append((self.blo.get_block_position(), self.blo.get_image(), self.selec))
+                        for ind, el in enumerate(self.lis_blo) :
+                            if (self.ax, self.ay) == el[0] :
+                                self.lis_blo[self.lis_blo.index(el)] = (self.blo.get_block_position(), self.blo.get_image(), self.selec) 
+                                self.lis_blo = list(set(self.lis_blo))
             if pygame.mouse.get_pressed() == (0, 0, 1):
                 x = (pygame.mouse.get_pos()[0]/32) * 32
                 y = (pygame.mouse.get_pos()[1]/32) * 32
@@ -77,5 +84,5 @@ class Game:
 
 if __name__ == '__main__':
     game = Game()
-    game.mainLoop()
-    #game.aff_li()
+    game.mainLoop()   
+    game.aff_li()
