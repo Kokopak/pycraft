@@ -4,7 +4,6 @@ import pygame
 
 from pygame.locals import *
 from block import Block
-from inventory import Inventory
 
 screen_mode = (640, 480)
 flags = DOUBLEBUF
