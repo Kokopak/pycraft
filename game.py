@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
 import pygame
+import ast
 
 from pygame.locals import *
 from block import Block
 
 screen_mode = (640, 480)
 flags = DOUBLEBUF | HWSURFACE
+
+timer = pygame.time.Clock()
+fps = 30
 
 class Game:
 
@@ -51,34 +55,48 @@ class Game:
         print self.lis_blo
 
     def mainLoop(self):
+        timer.tick(fps)
         while True:
             event = pygame.event.wait()
-            if event.type == QUIT:
+            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                 break
             if pygame.mouse.get_pressed() == (1, 0, 0):
-                    self.ax = (pygame.mouse.get_pos()[0]/32) * 32
-                    self.ay = (pygame.mouse.get_pos()[1]/32) * 32
-                    self.blo = Block(self.ax,self.ay,self.selec)
-                    if ((self.ax, self.ay), self.blo.get_image(), self.selec) not in self.lis_blo :
-                        self.lis_blo.append((self.blo.get_block_position(), self.blo.get_image(), self.selec))
-                        for ind, el in enumerate(self.lis_blo) :
-                            if (self.ax, self.ay) == el[0] :
-                                self.lis_blo[self.lis_blo.index(el)] = (self.blo.get_block_position(), self.blo.get_image(), self.selec) 
-                                self.lis_blo = list(set(self.lis_blo))
-            if pygame.mouse.get_pressed() == (0, 0, 1):
+                self.ax = (pygame.mouse.get_pos()[0]/32) * 32
+                self.ay = (pygame.mouse.get_pos()[1]/32) * 32
+                self.blo = Block(self.ax,self.ay,self.selec)
+                if ((self.ax, self.ay), self.blo.get_image(), self.selec) not in self.lis_blo :
+                    self.lis_blo.append((self.blo.get_block_position(), self.blo.get_image(), self.selec))
+                    for ind, el in enumerate(self.lis_blo) :
+                        if (self.ax, self.ay) == el[0] :
+                            self.lis_blo[self.lis_blo.index(el)] = (self.blo.get_block_position(), self.blo.get_image(), self.selec) 
+                            self.lis_blo = list(set(self.lis_blo))
+            elif pygame.mouse.get_pressed() == (0, 0, 1):
                 x = (pygame.mouse.get_pos()[0]/32) * 32
                 y = (pygame.mouse.get_pos()[1]/32) * 32
                 for el in self.lis_blo:
                     if el[0] == (x, y):
                         self.lis_blo.remove(el)
-            if event.type == KEYDOWN and event.key == K_SPACE:
+            elif event.type == KEYDOWN and event.key == K_SPACE:
                 self.lis_blo = []
-            if event.type == MOUSEBUTTONDOWN and event.button == 4:
+            elif event.type == KEYDOWN and event.key == K_s:
+                print "===SAUVEGARDE==="
+                desti = raw_input("Destination : ")
+                with open(desti, "w") as f:
+                    f.write(str(self.lis_blo))
+            elif event.type == KEYDOWN and event.key == K_l:
+                print "===LECTURE==="
+                desti = raw_input("Destination : ")
+                with open(desti, "r") as f:
+                    for line in f:
+                        f_list = ast.literal_eval(line)
+                self.lis_blo = []
+                self.lis_blo = f_list
+            elif event.type == MOUSEBUTTONDOWN and event.button == 4:
                 if self.blocks.index(self.selec) == len(self.blocks) - 1:
                     self.selec = self.blocks[0]
                 else:
                     self.selec = self.blocks[self.blocks.index(self.selec) + 1]
-            if event.type == MOUSEBUTTONDOWN and event.button == 5:
+            elif event.type == MOUSEBUTTONDOWN and event.button == 5:
                 if self.blocks.index(self.selec) == len(self.blocks) + 1:
                     self.selec = self.blocks[0]
                 else:
