@@ -12,7 +12,7 @@ class Game:
 
     def __init__(self, largeur, hauteur):
         pygame.init()
-        self.size = 16
+        self.size = 32
         self.largeur = largeur
         self.hauteur = hauteur
         self.fond = pygame.Color(23,147,205)
@@ -22,19 +22,9 @@ class Game:
         self.blank.fill(self.fond)
         pygame.display.update()
 
-        nameBlocks = [
-            "cobblestone",
-            "wooden_plank",
-            "stone",
-            "grass",
-            "glass",
-            "brick"
-        ]
-
-        # self.typeBlocks = [("Air", self.blank)]
-        self.typeBlocks = []
-        self.typeBlocks += [(nom, pygame.transform.scale(pygame.image.load("img/%s.png" % nom), (self.size, self.size))) for nom in nameBlocks]
-        self.nselec = 1
+        tileset = pygame.image.load("img/terrain.png")
+        self.typeBlocks = [("Tile %2d-%2d" % (x,y), pygame.transform.scale(tileset.subsurface(16*x, 16*y, 16, 16), (self.size, self.size))) for x in range(16) for y in range(16)]
+        self.nselec = 0
         pygame.display.set_caption("PyCraft - Selection: %s" % (self.typeBlocks[self.nselec][0].capitalize()))
         self.blocks = {(x, y): VIDE for x in range(self.largeur) for y in range(self.hauteur)}
 
@@ -74,5 +64,5 @@ class Game:
                 pygame.display.set_caption("PyCraft - Selection: %s" % (self.typeBlocks[self.nselec][0].capitalize()))
 
 if __name__ == '__main__':
-    game = Game(90, 80)
+    game = Game(30, 25)
     game.mainLoop()
