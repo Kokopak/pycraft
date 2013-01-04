@@ -1,28 +1,23 @@
 #!/usr/bin/env python
+#-*-coding: utf-8 -*-
 
 import pygame
 import ast
 
 from pygame.locals import *
-from block import Block
 
 screen_mode = (640, 480)
 flags = DOUBLEBUF | HWSURFACE
 
 timer = pygame.time.Clock()
-fps = 30
 
 class Game:
 
     def __init__(self):
         pygame.init()
         self.screen = pygame.display.set_mode(screen_mode, flags)
-        self.blo = Block()
-        self.lis_blo = []
 
-        self.font = pygame.font.Font(None, 17)
-
-        self.blocks = [
+        self.nameBlocks = [
                 "cobblestone",
                 "wooden_plank",
                 "stone",
@@ -31,82 +26,67 @@ class Game:
                 "brick"]
 
         self.selec = "cobblestone" 
+        self.image = "img/%s.png" % (self.selec)
         pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
 
-        self.back = pygame.image.load("img/grille.png").convert()
-        self.lis_blo = list(set(self.lis_blo))
+        #Coordonées de la souris
+        self.mx = 0
+        self.my = 0
 
-        self.ax = 0
-        self.ay = 0
+        #Dictionnaire sous la forme : {(x, y): image}
+        self.blocks = {}
 
-    def update(self) : 
-        self.sx = (pygame.mouse.get_pos()[0]/32) * 32
-        self.sy = (pygame.mouse.get_pos()[1]/32) * 32
 
-    def draw(self):
-        self.screen.blit(self.back, (0,0))
-        self.te = "img/"+self.selec+".png"
-        self.screen.blit(pygame.image.load(self.te), (self.sx, self.sy))
-        for el in self.lis_blo:
-            self.screen.blit(pygame.image.load(el[1]), (el[0][0], el[0][1]))
+    def update_mouse_pos(self):
+        self.mx, self.my = pygame.mouse.get_pos()
+        self.mx = (self.mx / 32) * 32
+        self.my = (self.my / 32) * 32
+
+    def drawBlocks(self):
+        #On dessine les images grâce à leurs coordonées
+        self.screen.blit(pygame.image.load(self.blocks[self.mx, self.my]), (self.mx, self.my))
         pygame.display.flip()
 
-    def aff_li(self):
-        print self.lis_blo
+    def removeBlock(self):
+        #On supprime la clé
+        del self.blocks[(self.mx, self.my)]
+        #On crée un background de la taille d'une image et de la couleur du bacground de la fenêtre (noir)
+        blank = pygame.Surface((32,32))
+        blank.fill((0,0,0))
+        self.screen.blit(blank, (self.mx, self.my))
+        pygame.display.flip()
 
     def mainLoop(self):
-        timer.tick(fps)
-        while True:
+        notQuit = True
+        while notQuit:
             event = pygame.event.wait()
-            if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
-                break
-            if pygame.mouse.get_pressed() == (1, 0, 0):
-                self.ax = (pygame.mouse.get_pos()[0]/32) * 32
-                self.ay = (pygame.mouse.get_pos()[1]/32) * 32
-                self.blo = Block(self.ax,self.ay,self.selec)
-                if ((self.ax, self.ay), self.blo.get_image(), self.selec) not in self.lis_blo :
-                    self.lis_blo.append((self.blo.get_block_position(), self.blo.get_image(), self.selec))
-                    for ind, el in enumerate(self.lis_blo) :
-                        if (self.ax, self.ay) == el[0] :
-                            self.lis_blo[self.lis_blo.index(el)] = (self.blo.get_block_position(), self.blo.get_image(), self.selec) 
-                            self.lis_blo = list(set(self.lis_blo))
+            if event.type == QUIT: 
+                print "Nombre total de blocks : %d" % (len(self.blocks))
+                notQuit= False
+            if pygame.mouse.get_pressed() == (1,0,0):
+                self.blocks[(self.mx, self.my)] = self.image
+                self.drawBlocks()
             elif pygame.mouse.get_pressed() == (0, 0, 1):
-                x = (pygame.mouse.get_pos()[0]/32) * 32
-                y = (pygame.mouse.get_pos()[1]/32) * 32
-                for el in self.lis_blo:
-                    if el[0] == (x, y):
-                        self.lis_blo.remove(el)
-            elif event.type == KEYDOWN and event.key == K_SPACE:
-                self.lis_blo = []
-            elif event.type == KEYDOWN and event.key == K_s:
-                print "===SAUVEGARDE==="
-                desti = raw_input("Destination : ")
-                with open(desti, "w") as f:
-                    f.write(str(self.lis_blo))
-            elif event.type == KEYDOWN and event.key == K_l:
-                print "===LECTURE==="
-                desti = raw_input("Destination : ")
-                with open(desti, "r") as f:
-                    for line in f:
-                        f_list = ast.literal_eval(line)
-                self.lis_blo = []
-                self.lis_blo = f_list
+                #Si les coordonées sont dans self.blocks (un block est déja à cette place)
+                if (self.mx, self.my) in self.blocks:
+                    #On le dégage
+                    self.removeBlock()
+            #Gestion de la molette
             elif event.type == MOUSEBUTTONDOWN and event.button == 4:
-                if self.blocks.index(self.selec) == len(self.blocks) - 1:
-                    self.selec = self.blocks[0]
+                if self.nameBlocks.index(self.selec) == len(self.nameBlocks) - 1:
+                    self.selec = self.nameBlocks[0]
                 else:
-                    self.selec = self.blocks[self.blocks.index(self.selec) + 1]
+                    self.selec = self.nameBlocks[self.nameBlocks.index(self.selec) + 1]
             elif event.type == MOUSEBUTTONDOWN and event.button == 5:
-                if self.blocks.index(self.selec) == len(self.blocks) + 1:
-                    self.selec = self.blocks[0]
+                if self.nameBlocks.index(self.selec) == len(self.nameBlocks) + 1:
+                    self.selec = self.nameBlocks[0]
                 else:
-                    self.selec = self.blocks[self.blocks.index(self.selec) - 1]
+                    self.selec = self.nameBlocks[self.nameBlocks.index(self.selec) - 1]
+
+            self.update_mouse_pos()
             pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
-            self.screen.blit(self.back, (0,0))
-            self.update()
-            self.draw()
+            self.image = "img/%s.png" % (self.selec)
 
 if __name__ == '__main__':
     game = Game()
     game.mainLoop()   
-    game.aff_li()
