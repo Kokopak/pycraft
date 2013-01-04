@@ -21,21 +21,21 @@ class Game:
         self.background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
         self.background.fill(self.fond)
         self.screen.blit(self.background, (0,0))
+        self.blank = pygame.Surface((self.size, self.size))
+        self.blank.fill(self.fond)
         pygame.display.flip()
 
-        self.nameBlocks = [
-                "cobblestone",
-                "wooden_plank",
-                "stone",
-                "grass",
-                "glass",
-                "brick"]
+        nameBlocks = [
+            "cobblestone",
+            "wooden_plank",
+            "stone",
+            "grass",
+            "glass",
+            "brick"
+        ]
 
-        self.selec = "cobblestone"
-        self.image = "img/%s.png" % (self.selec)
-        pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
-
-        #Dictionnaire sous la forme : {(x, y): image}
+        self.typeBlocks = [(nom, pygame.image.load("img/%s.png" % nom)) for nom in nameBlocks]
+        self.nselec = 0
         self.blocks = {}
 
     def get_mouse(self):
@@ -53,33 +53,30 @@ class Game:
                 notQuit= False
             if pygame.mouse.get_pressed() == (1,0,0):
                 mx, my = self.get_mouse()
-                self.blocks[mx, my] = self.image
-                self.screen.blit(pygame.image.load(self.blocks[mx, my]), (mx*self.size, my*self.size))
+                self.blocks[mx, my] = self.nselec
+                self.screen.blit(self.blank, (mx*self.size, my*self.size))
+                self.screen.blit(self.typeBlocks[self.nselec][1], (mx*self.size, my*self.size))
                 pygame.display.flip()
             elif pygame.mouse.get_pressed() == (0, 0, 1):
                 mx, my = self.get_mouse()
                 #Si les coordonées sont dans self.blocks (un block est déja à cette place)
                 if (mx, my) in self.blocks:
-                    #On supprime la clé
-                    del self.blocks[mx, my]
-                    #On crée un background de la taille d'une image et de la couleur du bacground de la fenêtre (noir)
-                    blank = pygame.Surface((self.size, self.size))
-                    blank.fill(self.fond)
-                    self.screen.blit(blank, (mx*self.size, my*self.size))
-                    pygame.display.flip()
+                   #On supprime la clé
+                   del self.blocks[mx, my]
+                #On crée un background de la taille d'une image et de la couleur du bacground de la fenêtre (noir)
+                self.screen.blit(self.blank, (mx*self.size, my*self.size))
+                pygame.display.flip()
             #Gestion de la molette
             elif event.type == MOUSEBUTTONDOWN and event.button == 4:
-                if self.nameBlocks.index(self.selec) == len(self.nameBlocks) - 1:
-                    self.selec = self.nameBlocks[0]
-                else:
-                    self.selec = self.nameBlocks[self.nameBlocks.index(self.selec) + 1]
+                self.nselec += 1
+                if self.nselec == len(self.typeBlocks):
+                    self.nselec = 0
+                pygame.display.set_caption("PyCraft - Selection: %s" % (self.typeBlocks[self.nselec][0].capitalize()))
             elif event.type == MOUSEBUTTONDOWN and event.button == 5:
-                if self.nameBlocks.index(self.selec) == len(self.nameBlocks) + 1:
-                    self.selec = self.nameBlocks[0]
-                else:
-                    self.selec = self.nameBlocks[self.nameBlocks.index(self.selec) - 1]
-            pygame.display.set_caption("PyCraft 2D - Selection: %s" %(self.selec.capitalize()))
-            self.image = "img/%s.png" % (self.selec)
+                self.nselec -= 1
+                if self.nselec == -1:
+                    self.nselec = len(self.typeBlocks) - 1
+                pygame.display.set_caption("PyCraft - Selection: %s" % (self.typeBlocks[self.nselec][0].capitalize()))
 
 if __name__ == '__main__':
     game = Game()
