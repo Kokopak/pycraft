@@ -17,6 +17,11 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode(screen_mode, flags)
 
+        self.background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        self.background.fill((23,147,205))
+        self.screen.blit(self.background, (0,0))
+        pygame.display.flip()
+
         self.nameBlocks = [
                 "cobblestone",
                 "wooden_plank",
@@ -52,7 +57,7 @@ class Game:
         del self.blocks[(self.mx, self.my)]
         #On crée un background de la taille d'une image et de la couleur du bacground de la fenêtre (noir)
         blank = pygame.Surface((32,32))
-        blank.fill((0,0,0))
+        blank.fill((23,147,205))
         self.screen.blit(blank, (self.mx, self.my))
         pygame.display.flip()
 
